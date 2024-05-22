@@ -1,7 +1,9 @@
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 require("dotenv").config();
-const { CLIENT } = process.env;
+
+const PORT = process.env.PORT || 3000;
+const CLIENT = process.env.CLIENT;
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -13,8 +15,8 @@ const io = new Server(httpServer, {
 const allUsers = {};
 const allRooms = [];
 
-httpServer.listen(3000, () => {
-  console.log("listening on port 3000");
+httpServer.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
 });
 
 io.on("connection", (socket) => {
@@ -68,18 +70,30 @@ io.on("connection", (socket) => {
       };
 
       currentUser.socket.on("playerMoveFromClient", handlePlayerMoveFromClient);
-      opponentPlayer.socket.on("playerMoveFromClient", handleOpponentPlayerMoveFromClient);
+      opponentPlayer.socket.on(
+        "playerMoveFromClient",
+        handleOpponentPlayerMoveFromClient
+      );
 
       socket.on("disconnect", () => {
         opponentPlayer.socket.emit("opponentLeftMatch");
         opponentPlayer.playing = false;
 
         // Clean up listeners
-        currentUser.socket.off("playerMoveFromClient", handlePlayerMoveFromClient);
-        opponentPlayer.socket.off("playerMoveFromClient", handleOpponentPlayerMoveFromClient);
+        currentUser.socket.off(
+          "playerMoveFromClient",
+          handlePlayerMoveFromClient
+        );
+        opponentPlayer.socket.off(
+          "playerMoveFromClient",
+          handleOpponentPlayerMoveFromClient
+        );
 
         // Remove room
-        const roomIndex = allRooms.findIndex(room => room.player1 === opponentPlayer || room.player2 === opponentPlayer);
+        const roomIndex = allRooms.findIndex(
+          (room) =>
+            room.player1 === opponentPlayer || room.player2 === opponentPlayer
+        );
         if (roomIndex !== -1) {
           allRooms.splice(roomIndex, 1);
         }
