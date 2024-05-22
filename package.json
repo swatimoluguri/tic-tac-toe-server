@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "socket.io": "^4.7.4"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
