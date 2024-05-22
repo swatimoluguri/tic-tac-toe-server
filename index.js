@@ -1,5 +1,6 @@
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const cors = require("cors");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3000; // Use the port provided by Render or fallback to 3000
@@ -7,6 +8,7 @@ const CLIENT = process.env.CLIENT; // Ensure this environment variable is set in
 
 const express = require("express"); // Use express to handle HTTP routes
 const app = express();
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("Server is up and running");
