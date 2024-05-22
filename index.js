@@ -2,13 +2,21 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 require("dotenv").config();
 
-const PORT = process.env.PORT || 3000;
-const CLIENT = process.env.CLIENT;
+const PORT = process.env.PORT || 3000; // Use the port provided by Render or fallback to 3000
+const CLIENT = process.env.CLIENT; // Ensure this environment variable is set in Render
 
-const httpServer = createServer();
+const express = require("express"); // Use express to handle HTTP routes
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Server is up and running");
+});
+
+const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: CLIENT,
+    methods: ["GET", "POST"]
   },
 });
 
@@ -70,30 +78,18 @@ io.on("connection", (socket) => {
       };
 
       currentUser.socket.on("playerMoveFromClient", handlePlayerMoveFromClient);
-      opponentPlayer.socket.on(
-        "playerMoveFromClient",
-        handleOpponentPlayerMoveFromClient
-      );
+      opponentPlayer.socket.on("playerMoveFromClient", handleOpponentPlayerMoveFromClient);
 
       socket.on("disconnect", () => {
         opponentPlayer.socket.emit("opponentLeftMatch");
         opponentPlayer.playing = false;
 
         // Clean up listeners
-        currentUser.socket.off(
-          "playerMoveFromClient",
-          handlePlayerMoveFromClient
-        );
-        opponentPlayer.socket.off(
-          "playerMoveFromClient",
-          handleOpponentPlayerMoveFromClient
-        );
+        currentUser.socket.off("playerMoveFromClient", handlePlayerMoveFromClient);
+        opponentPlayer.socket.off("playerMoveFromClient", handleOpponentPlayerMoveFromClient);
 
         // Remove room
-        const roomIndex = allRooms.findIndex(
-          (room) =>
-            room.player1 === opponentPlayer || room.player2 === opponentPlayer
-        );
+        const roomIndex = allRooms.findIndex(room => room.player1 === opponentPlayer || room.player2 === opponentPlayer);
         if (roomIndex !== -1) {
           allRooms.splice(roomIndex, 1);
         }
